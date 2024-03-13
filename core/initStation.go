@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
+	"time"
 
 	"github.com/ComputerKeeda/junction/x/junction/types"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
@@ -12,13 +14,14 @@ import (
 
 func InitStation(addr string, client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account) {
 
+	randomStationId, randomStationInfo := generateRandomString()
 	// Define a message to create a post
 	msg := &types.MsgInitStation{
 		Creator:         addr,
 		Tracks:          []string{"air10vnvsez37eukd9hm9yp3969n6m8y93444upax8", "air10vnvsez37eukd9hm9yp3969n6m8y93444upax8", "air10vnvsez37eukd9hm9yp3969n6m8y93444upax8", "air10vnvsez37eukd9hm9yp3969n6m8y93444upax8"},
 		VerificationKey: []byte("verificationKey"),
-		StationId:       "stationId-324789",
-		StationInfo:     "stationInfo-324789",
+		StationId:       randomStationId,
+		StationInfo:     randomStationInfo,
 	}
 
 	// Broadcast a transaction from account `alice` with the message
@@ -38,10 +41,25 @@ func InitStation(addr string, client cosmosclient.Client, ctx context.Context, a
 	// Instantiate a query client for your `blog` blockchain
 	queryClient := types.NewQueryClient(client.Context())
 
-	queryResp, err := queryClient.GetTracks(ctx, &types.QueryGetTracksRequest{StationId: "stationId-324789"})
+	queryResp, err := queryClient.GetTracks(ctx, &types.QueryGetTracksRequest{StationId: randomStationId})
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Print("\n\nAll posts:\n\n")
 	fmt.Println(queryResp)
+}
+
+// Function to generate a random string in the format "stationId-xxxx"
+func generateRandomString() (string, string) {
+	// Seed the random number generator
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	// Generate a random four-digit number
+	randomNumber := rand.Intn(9000) + 1000 // Generates a number between 1000 and 9999
+
+	// Concatenate the string parts
+	randomStationId := fmt.Sprintf("stationId-%d", randomNumber)
+	randomStationInfo := fmt.Sprintf("stationInfo-%d", randomNumber)
+
+	return randomStationId, randomStationInfo
 }
