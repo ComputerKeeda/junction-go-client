@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"github.com/ComputerKeeda/junction-go-client/components"
 	"log"
 
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
@@ -18,7 +19,9 @@ func SendToken(reqAmount int64, toAddress string, ctx context.Context, account c
 	addressPrefix := "air"
 
 	// Create a Cosmos client instance
-	client, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress("http://192.168.1.37:26657"), cosmosclient.WithHome(accountPath))
+	client, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix),
+		cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome(accountPath),
+		cosmosclient.WithGas("auto"), cosmosclient.WithFees("200amf"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,7 +41,7 @@ func SendToken(reqAmount int64, toAddress string, ctx context.Context, account c
 	msg := &cosmosBankTypes.MsgSend{
 		FromAddress: adminAddress,
 		ToAddress:   toAddress,
-		Amount:      cosmosTypes.NewCoins(cosmosTypes.NewInt64Coin("stake", reqAmount)),
+		Amount:      cosmosTypes.NewCoins(cosmosTypes.NewInt64Coin("amf", reqAmount)),
 	}
 
 	txResp, err := client.BroadcastTx(ctx, account, msg)

@@ -18,7 +18,7 @@ func CheckBalance(ctx context.Context, accountAddress string, client cosmosclien
 	}
 
 	for _, balance := range balances {
-		if balance.Denom == "stake" {
+		if balance.Denom == "amf" {
 			return true, balance.Amount.Int64(), nil
 		}
 	}

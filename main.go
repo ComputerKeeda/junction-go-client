@@ -19,12 +19,11 @@ func main() {
 	accountPath := "./accounts"
 
 	// Create a Cosmos client instance
-	client, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress("http://192.168.1.37:26657"))
+	client, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome(accountPath), cosmosclient.WithGas("auto"), cosmosclient.WithFees("200amf"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Account `alice` was initialized during `ignite chain serve`
 	accountName := "alice"
 
 	isAccountExists, _ := components.CheckIfAccountExists(accountName, client, addressPrefix, accountPath)
@@ -33,23 +32,6 @@ func main() {
 		components.CreateAccount(accountName, accountPath)
 	}
 
-	account, err := client.Account(accountName)
-	if err != nil {
-		fmt.Println("Error getting account")
-	}
-
-	addr, err := account.Address(addressPrefix)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Account Address:", addr)
-
-	newTempAddr, newTempAccount := core.GetTempAddr(10)
-	fmt.Println("Temp Address:", newTempAddr)
-	newAccountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress("http://192.168.1.37:26657"), cosmosclient.WithHome("./temp-account"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	core.InitStation(newTempAddr, newAccountClient, ctx, newTempAccount)
+	newTempAddr, _ := core.GetTempAddr(10)
+	components.Logger.Warn(fmt.Sprintf("Station Creator Address: %s\n", newTempAddr))
 }

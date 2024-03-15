@@ -22,19 +22,16 @@ func GetTempAddr(amount int64) (newTempAddr string, newTempAccount cosmosaccount
 		fmt.Println("Error deleting directory:", err)
 	}
 
-	fmt.Println("temp-account Directory successfully deleted")
-	fmt.Println("creating a new temp-account directory")
-
 	ctx := context.Background()
 	addressPrefix := "air"
 
 	// Create a Cosmos newAccountClient instance
-	newAccountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress("http://192.168.1.37:26657"), cosmosclient.WithHome(accountPath))
+	newAccountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome(accountPath), cosmosclient.WithGas("auto"), cosmosclient.WithFees("200amf"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	adminAccountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress("http://192.168.1.37:26657"), cosmosclient.WithHome("./accounts"))
+	adminAccountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome("./accounts"), cosmosclient.WithGas("auto"), cosmosclient.WithFees("200amf"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,7 +47,7 @@ func GetTempAddr(amount int64) (newTempAddr string, newTempAccount cosmosaccount
 		log.Fatal(err)
 	}
 
-	fmt.Println("Admin jlfksda;adfsjkl; Address:", adminAddress)
+	components.Logger.Warn(fmt.Sprintf("Admin alice address : %s\n", adminAddress))
 
 	accountName := "temp-account"
 	components.CreateAccount(accountName, accountPath)
@@ -68,7 +65,7 @@ func GetTempAddr(amount int64) (newTempAddr string, newTempAccount cosmosaccount
 	msg := &cosmosBankTypes.MsgSend{
 		FromAddress: adminAddress,
 		ToAddress:   newTempAddr,
-		Amount:      cosmosTypes.NewCoins(cosmosTypes.NewInt64Coin("stake", amount)),
+		Amount:      cosmosTypes.NewCoins(cosmosTypes.NewInt64Coin("amf", amount)),
 	}
 
 	txResp, err := adminAccountClient.BroadcastTx(ctx, adminAccount, msg)
@@ -78,17 +75,6 @@ func GetTempAddr(amount int64) (newTempAddr string, newTempAccount cosmosaccount
 	}
 
 	fmt.Printf("Tx Hash: %v\n", txResp.TxHash)
-
-	// success, msg, txHash, faucetErr := SendToken(amount, newTempAddr, ctx, newTempAccount, "alice")
-	// if !success {
-	// 	fmt.Println("Error in sending tokens to temp account")
-	// 	fmt.Println(msg)
-	// 	fmt.Println(faucetErr)
-	// } else {
-	// 	fmt.Println("Temp account created successfully")
-	// 	fmt.Println("Temp account address: ", newTempAddr)
-	// 	fmt.Println("Transaction Hash for sending tokens to temp account: ", txHash)
-	// }
 
 	return newTempAddr, newTempAccount
 }

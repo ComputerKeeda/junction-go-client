@@ -72,6 +72,6 @@ func CreateAccount(accountName string, accountPath string) {
 		fmt.Println(err.Error())
 	}
 
-	fmt.Println("Rollup Account Created > ", accountAddr)
-	fmt.Println(mnemonic)
+	Logger.Info(fmt.Sprintf("Rollup Account Created > %s", accountAddr))
+	Logger.Debug(mnemonic)
 }
