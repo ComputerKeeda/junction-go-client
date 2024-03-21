@@ -36,7 +36,7 @@ func SubmitPod(merkleRootHash string, publicWitness any) bool {
 	}
 
 	ctx := context.Background()
-	gas := components.GenerateRandomWithFavour(84, 120, [2]int{85, 110}, 0.7)
+	gas := components.GenerateRandomWithFavour(100, 300, [2]int{120, 250}, 0.7)
 	gasFees := fmt.Sprintf("%damf", gas)
 	components.Logger.Warn(fmt.Sprintf("Gas Fees Used for pod submission is: %s\n", gasFees))
 	accountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome(accountPath), cosmosclient.WithGas("auto"), cosmosclient.WithFees(gasFees))

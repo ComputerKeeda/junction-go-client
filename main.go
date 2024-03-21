@@ -7,7 +7,9 @@ import (
 	"github.com/ComputerKeeda/junction-go-client/components/prover"
 	"github.com/ComputerKeeda/junction-go-client/components/vrf"
 	"github.com/ComputerKeeda/junction-go-client/core"
+	"github.com/ComputerKeeda/junction-go-client/types"
 	"log"
+	"time"
 
 	// Importing the general purpose Cosmos blockchain client
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
@@ -83,9 +85,15 @@ func main() {
 
 func RecursiveFunctions() { // client, ctx context.Context
 
-	initVRFResponse, serializedRc := core.InitVRF()
-	if !initVRFResponse {
-		return
+	var funcLevelSerializedRc []byte
+	for {
+		initVRFResponse, serializedRc := core.InitVRF()
+		if !initVRFResponse {
+			time.Sleep(5 * time.Second)
+		} else {
+			funcLevelSerializedRc = serializedRc
+			break
+		}
 	}
 
 	// validate vrf
@@ -128,17 +136,19 @@ func RecursiveFunctions() { // client, ctx context.Context
 		return
 	}
 
-	_ = proofByte
-	_ = daKeyHash
-	_ = success
+	for {
+		err := chain.UpdatePodNumber()
+		if err != nil {
+			components.Logger.Error(fmt.Sprintf("Error updating pod number: %s", err.Error()))
+			time.Sleep(5 * time.Second)
+			continue
+		} else {
+			break
+		}
+	}
 
-	/*
-		✔️Vrf init
-		✔️Vrf verify
-		✔️Pod submit
-		Pod verify
-		update podNumber in podNumber.txt
-	*/
+	components.Logger.Debug(fmt.Sprintf("Pod Number Updated: %d", intPodNumber))
+	components.Logger.Debug("🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧")
 
-	//RecursiveFunctions()
+	RecursiveFunctions()
 }

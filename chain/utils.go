@@ -153,6 +153,28 @@ func GetPodNumber() (podNumber uint64, err error) {
 	return num, nil
 }
 
+// UpdatePodNumber increments the pod number by 1
+func UpdatePodNumber() error {
+	// Get the current pod number
+	currentPodNumber, err := GetPodNumber()
+	if err != nil {
+		return err
+	}
+
+	// Increment the pod number
+	newPodNumber := currentPodNumber + 1
+
+	// Convert the new pod number back to a string
+	newPodNumberStr := strconv.FormatUint(newPodNumber, 10)
+
+	// Write the new pod number to the file
+	err = os.WriteFile("data/podNumber.txt", []byte(newPodNumberStr), 0644)
+	if err != nil {
+		return fmt.Errorf("error writing new pod number to file: %w", err)
+	}
+
+	return nil
+}
 func GetPrivateKey() (privateKey string, err error) {
 	// get private Key
 	file, err := os.Open("data/vrfPrivKey.txt")

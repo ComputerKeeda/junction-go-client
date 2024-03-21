@@ -9,7 +9,11 @@ import (
 )
 
 func GetVRF() *types.VrfRecord {
-
+	/*
+	   	this check suggests that the pointer can be nil
+	      var nil Type	// Type must be a pointer, channel, func, interface, map, or slice type
+	      nil is a predeclared identifier representing the zero value for a pointer, channel, func, interface, map, or slice type.
+	*/
 	stationId, err := chain.GetStationId()
 	if err != nil {
 		components.Logger.Error(err.Error())
