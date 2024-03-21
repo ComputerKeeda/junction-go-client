@@ -78,7 +78,7 @@ func InitVRF() (bool, []byte) {
 	rc := vrf.RequestCommitmentV2Plus{
 		BlockNum:         1,
 		StationId:        stationId,
-		UpperBound:       5,
+		UpperBound:       1,
 		RequesterAddress: newTempAddr,
 	}
 
@@ -108,7 +108,7 @@ func InitVRF() (bool, []byte) {
 	}
 
 	var defaultOccupancy uint64
-	defaultOccupancy = 5
+	defaultOccupancy = components.DefaultOccupancy
 	msg := types.MsgInitiateVrf{
 		Creator:        newTempAddr,
 		PodNumber:      podNumber,

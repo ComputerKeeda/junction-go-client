@@ -107,19 +107,18 @@ func InitStation() string {
 	}
 
 	//occupancy := components.GenerateRandomWithFavour(1, 10, [2]int{2, 5}, 0.5)
-	occupancy := 4
-	otherTrackMembers := components.GenerateAddresses(occupancy)
+	//occupancy := 0
+	//otherTrackMembers := components.GenerateAddresses(occupancy)
 
 	// tracks voting power creator
 	var tracksVotingPower []uint64
-	power := uint64(100 / 5)
-	for i := 0; i < 5; i++ {
+	power := uint64(100)
+	for i := 0; i < 1; i++ {
 		tracksVotingPower = append(tracksVotingPower, power)
 	}
-
 	var tracks []string
 	tracks = append(tracks, newTempAddr)
-	tracks = append(tracks, otherTrackMembers...)
+	//tracks = append(tracks, otherTrackMembers...)
 	stationId := uuid.New()
 	randomStationInfo, randomStationInfoError := generateRandomChainInfo()
 	if randomStationInfoError != nil {
@@ -142,8 +141,8 @@ func InitStation() string {
 	}
 
 	extraArg := types.StationArg{
-		TrackType: "Airchains sequencer",
-		DaType:    "Celestia",
+		TrackType: "Airchains Sequencer",
+		DaType:    "Eigen",
 		Prover:    "Airchains",
 	}
 

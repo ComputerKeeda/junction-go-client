@@ -1,8 +1,10 @@
 package chain
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/ComputerKeeda/junction-go-client/components"
+	"github.com/ComputerKeeda/junction-go-client/types"
 	"io"
 	"os"
 	"strconv"
@@ -193,4 +195,78 @@ func GetPubKey() (pubKey string, err error) {
 	}
 
 	return pubKey, nil
+}
+
+func GetOldDaBlob() (da types.DAStruct, err error) {
+	fileOpen, err := os.Open("data/oldDaBlob.json")
+	if err != nil {
+		fmt.Println("Failed to read file: %s" + err.Error())
+		return da, err
+	}
+	defer fileOpen.Close()
+
+	// unmarshal it
+	byteValue, err := io.ReadAll(fileOpen)
+	if err != nil {
+		return da, err
+	}
+
+	err = json.Unmarshal(byteValue, &da)
+	if err != nil {
+		return da, err
+	}
+	return da, nil
+}
+
+func SetOldDaBlob(daStructValue types.DAStruct) (success bool) {
+	//fmt.Println(daStructValue)
+	fileOpen, err := os.Open("data/oldDaBlob.json")
+	if err != nil {
+		fmt.Println("Failed to read file: %s" + err.Error())
+		return false
+	}
+	defer fileOpen.Close()
+
+	// convert newBatch to json and save in file
+	daStructValueJson, err := json.Marshal(daStructValue)
+	if err != nil {
+		fmt.Println("Failed to convert daStructValue to json: %s" + err.Error())
+		return false
+	}
+
+	err = os.WriteFile("data/oldDaBlob.json", daStructValueJson, 0644)
+	if err != nil {
+		fmt.Println("Failed to write file: %s" + err.Error())
+		return false
+	}
+	return true
+}
+
+func CreateOldDaBlog() error {
+	filename := "data/oldDaBlob.json"
+
+	// Define the initial JSON structure
+	initialJSON := map[string]string{
+		"da_key":              "0",
+		"da_client_name":      "mock",
+		"batch_number":        "0",
+		"previous_state_hash": "0",
+		"current_state_hash":  "0",
+	}
+
+	// Check if the file exists
+	if _, err := os.Stat(filename); os.IsNotExist(err) || err == nil {
+		// The file does not exist, or an error occurred in checking; attempt to read the file
+		content, err := os.ReadFile(filename)
+		if err != nil || len(content) == 0 {
+			// File does not exist, or is empty; write the initial JSON
+			jsonContent, err := json.MarshalIndent(initialJSON, "", "  ")
+			if err != nil {
+				return fmt.Errorf("error marshaling initial JSON: %w", err)
+			}
+			return os.WriteFile(filename, jsonContent, 0644)
+		}
+	}
+	// File exists and is not empty, no action needed
+	return nil
 }

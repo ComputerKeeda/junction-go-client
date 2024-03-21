@@ -17,6 +17,17 @@ import (
 )
 
 func main() {
+	//CreateOldDaBlog
+
+	err := chain.CreateOldDaBlog()
+	if err != nil {
+		// If there was an error, print it
+		fmt.Println("Error:", err)
+	} else {
+		// If the file was successfully created or already existed, print a success message
+		fmt.Println("File ensured:", "oldDaBlog.json")
+	}
+
 	ctx := context.Background()
 	addressPrefix := "air"
 	accountPath := "./accounts"
@@ -93,10 +104,38 @@ func RecursiveFunctions() { // client, ctx context.Context
 		return
 	}
 
+	podNumber, err := chain.GetPodNumber()
+	if err != nil {
+		components.Logger.Error(err.Error())
+		return
+	}
+	intPodNumber := int(podNumber)
+
+	ps := components.GenerateUniqueRandomValues(25) // Generate 25 sets of unique values
+	witnessVector, currentStatusHash, proofByte, pkErr := prover.GenerateProof(ps, intPodNumber)
+	if pkErr != nil {
+		components.Logger.Error(fmt.Sprintf("Error in generating proof : %s", pkErr.Error()))
+		return
+	}
+
+	// Mock DA call
+	success, daKeyHash := chain.MockDa(ps.TransactionHash, currentStatusHash, intPodNumber)
+
+	// submit pod
+	podSubmitSuccess := core.SubmitPod(currentStatusHash, witnessVector)
+	if !podSubmitSuccess {
+		components.Logger.Error("Pod submission failed")
+		return
+	}
+
+	_ = proofByte
+	_ = daKeyHash
+	_ = success
+
 	/*
 		✔️Vrf init
 		✔️Vrf verify
-		Pod submit
+		✔️Pod submit
 		Pod verify
 		update podNumber in podNumber.txt
 	*/

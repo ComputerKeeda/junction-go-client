@@ -7,33 +7,21 @@ import (
 	"fmt"
 	"github.com/ComputerKeeda/junction-go-client/components"
 	"github.com/ComputerKeeda/junction-go-client/types"
-	"math/rand"
-	"os"
-	"time"
-
 	"github.com/consensys/gnark-crypto/ecc"
-	tedwards "github.com/consensys/gnark-crypto/ecc/twistededwards"
-	"github.com/consensys/gnark-crypto/hash"
-	cryptoEddsa "github.com/consensys/gnark-crypto/signature/eddsa"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/constraint"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
-	"github.com/consensys/gnark/std/algebra/native/twistededwards"
-	"github.com/consensys/gnark/std/hash/mimc"
-	"github.com/consensys/gnark/std/signature/eddsa"
+	"os"
 )
 
 type MyCircuit struct {
-	To              [components.BatchSize]frontend.Variable `gnark:",public"`
-	From            [components.BatchSize]frontend.Variable `gnark:",public"`
-	Amount          [components.BatchSize]frontend.Variable `gnark:",public"`
-	TransactionHash [components.BatchSize]frontend.Variable `gnark:",public"`
-	FromBalances    [components.BatchSize]frontend.Variable `gnark:",public"`
-	ToBalances      [components.BatchSize]frontend.Variable `gnark:",public"`
-	Messages        [components.BatchSize]frontend.Variable `gnark:",public"`
-	PublicKeys      [components.BatchSize]eddsa.PublicKey   `gnark:",public"`
-	Signatures      [components.BatchSize]eddsa.Signature   `gnark:",public"`
+	To              [components.PodSize]frontend.Variable `gnark:",public"`
+	From            [components.PodSize]frontend.Variable `gnark:",public"`
+	Amount          [components.PodSize]frontend.Variable `gnark:",public"`
+	TransactionHash [components.PodSize]frontend.Variable `gnark:",public"`
+	FromBalances    [components.PodSize]frontend.Variable `gnark:",public"`
+	ToBalances      [components.PodSize]frontend.Variable `gnark:",public"`
 }
 
 type TransactionSecond struct {
@@ -77,22 +65,7 @@ func GetMerkleRootSecond(transactions []TransactionSecond) string {
 }
 
 func (circuit *MyCircuit) Define(api frontend.API) error {
-	for i := 0; i < components.BatchSize; i++ {
-
-		curve, err := twistededwards.NewEdCurve(api, tedwards.ID(ecc.BLS12_381))
-		if err != nil {
-			fmt.Println("Error creating a curve")
-			return err
-		}
-		newMiMC, err := mimc.NewMiMC(api)
-		if err != nil {
-			return err
-		}
-		err = eddsa.Verify(curve, circuit.Signatures[i], circuit.Messages[i], circuit.PublicKeys[i], &newMiMC)
-		if err != nil {
-			fmt.Println("Error verifying signature")
-			return err
-		}
+	for i := 0; i < components.PodSize; i++ {
 		api.AssertIsLessOrEqual(circuit.Amount[i], circuit.FromBalances[i])
 
 		api.Sub(circuit.FromBalances[i], circuit.Amount[i])
@@ -121,12 +94,12 @@ func GenerateKeyPair() (groth16.ProvingKey, groth16.VerifyingKey, error) {
 	return pk, vk, error
 }
 
-func GenerateProof(inputData types.BatchStruct, batchNum int) (any, string, []byte, error) {
+func GenerateProof(inputData types.PodStruct, PodNumber int) (any, string, []byte, error) {
 	fmt.Println("Generating Proof")
 	ccs := ComputeCCS()
 
 	var transactions []TransactionSecond
-	for i := 0; i < components.BatchSize; i++ {
+	for i := 0; i < components.PodSize; i++ {
 		transaction := TransactionSecond{
 			To:              inputData.To[i],
 			From:            inputData.From[i],
@@ -152,10 +125,6 @@ func GenerateProof(inputData types.BatchStruct, batchNum int) (any, string, []by
 		return nil, "", nil, err
 	}
 
-	seed := time.Now().Unix()
-	randomness := rand.New(rand.NewSource(seed))
-	hFunc := hash.MIMC_BLS12_381.New()
-	snarkField, err := twistededwards.GetSnarkField(tedwards.BLS12_381)
 	if err != nil {
 		fmt.Println("Error getting snark field")
 		return nil, "", nil, err
@@ -186,8 +155,8 @@ func GenerateProof(inputData types.BatchStruct, batchNum int) (any, string, []by
 		return nil, "", nil, fmt.Errorf("input data is not correct")
 	}
 
-	if inputValueLength < components.BatchSize {
-		leftOver := components.BatchSize - inputValueLength
+	if inputValueLength < components.PodSize {
+		leftOver := components.PodSize - inputValueLength
 		for i := 0; i < leftOver; i++ {
 			inputData.From = append(inputData.From, "0")
 			inputData.To = append(inputData.To, "0")
@@ -202,18 +171,15 @@ func GenerateProof(inputData types.BatchStruct, batchNum int) (any, string, []by
 	}
 
 	inputs := MyCircuit{
-		To:              [components.BatchSize]frontend.Variable{},
-		From:            [components.BatchSize]frontend.Variable{},
-		Amount:          [components.BatchSize]frontend.Variable{},
-		TransactionHash: [components.BatchSize]frontend.Variable{},
-		FromBalances:    [components.BatchSize]frontend.Variable{},
-		ToBalances:      [components.BatchSize]frontend.Variable{},
-		Signatures:      [components.BatchSize]eddsa.Signature{},
-		PublicKeys:      [components.BatchSize]eddsa.PublicKey{},
-		Messages:        [components.BatchSize]frontend.Variable{},
+		To:              [components.PodSize]frontend.Variable{},
+		From:            [components.PodSize]frontend.Variable{},
+		Amount:          [components.PodSize]frontend.Variable{},
+		TransactionHash: [components.PodSize]frontend.Variable{},
+		FromBalances:    [components.PodSize]frontend.Variable{},
+		ToBalances:      [components.PodSize]frontend.Variable{},
 	}
 
-	for i := 0; i < components.BatchSize; i++ {
+	for i := 0; i < components.PodSize; i++ {
 		// var amount string
 		if inputData.Amounts[i] > inputData.SenderBalances[i] {
 			fmt.Println("Amount value give below")
@@ -228,24 +194,6 @@ func GenerateProof(inputData types.BatchStruct, batchNum int) (any, string, []by
 		inputs.TransactionHash[i] = frontend.Variable(inputData.TransactionHash[i])
 		inputs.FromBalances[i] = frontend.Variable(inputData.SenderBalances[i])
 		inputs.ToBalances[i] = frontend.Variable(inputData.ReceiverBalances[i])
-		// msg := []byte(inputData.Messages[i])
-		msg := make([]byte, len(snarkField.Bytes()))
-
-		inputs.Messages[i] = msg
-		privateKey, err := cryptoEddsa.New(tedwards.ID(ecc.BLS12_381), randomness)
-		if err != nil {
-			fmt.Println("Not able to generate private keys")
-		}
-		publicKey := privateKey.Public()
-		signature, err := privateKey.Sign(msg, hFunc)
-		if err != nil {
-			fmt.Println("Error signing the message")
-			return nil, "", nil, err
-		}
-		_publicKey := publicKey.Bytes()
-
-		inputs.PublicKeys[i].Assign(tedwards.BLS12_381, _publicKey[:32])
-		inputs.Signatures[i].Assign(tedwards.BLS12_381, signature)
 	}
 
 	witness, err := frontend.NewWitness(&inputs, ecc.BLS12_381.ScalarField())

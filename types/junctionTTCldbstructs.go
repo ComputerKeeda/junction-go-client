@@ -42,7 +42,7 @@ type TransactionStruct struct {
 	Value            string `json:"value"`
 }
 
-type BatchStruct struct {
+type PodStruct struct {
 	From              []string `json:"from"`
 	To                []string `json:"to"`
 	Amounts           []string `json:"amounts"`
