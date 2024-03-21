@@ -37,9 +37,10 @@ func InitVRF() bool {
 	}
 
 	ctx := context.Background()
-	//gas := components.GenerateRandomWithFavour(600, 1200, [2]int{611, 1000}, 0.7)
-	//gasFees := fmt.Sprintf("%damf", gas)
-	accountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome(accountPath), cosmosclient.WithGas("auto"), cosmosclient.WithFees("100amf"))
+	gas := components.GenerateRandomWithFavour(69, 120, [2]int{70, 90}, 0.7)
+	gasFees := fmt.Sprintf("%damf", gas)
+	components.Logger.Warn(fmt.Sprintf("Gas Fees Used for init VRF transaction is: %s\n", gasFees))
+	accountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome(accountPath), cosmosclient.WithGas("auto"), cosmosclient.WithFees(gasFees))
 	if err != nil {
 		components.Logger.Error("Error creating account client")
 		return false
