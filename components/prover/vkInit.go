@@ -13,7 +13,7 @@ func CreateVkPk() {
 
 	if _, err := os.Stat(provingKeyFile); os.IsNotExist(err) {
 		if _, err := os.Stat(verificationKeyFile); os.IsNotExist(err) {
-			provingKey, verificationKey, err2 := GenerateVerificationKey()
+			provingKey, verificationKey, err2 := GenerateKeyPair()
 			if err2 != nil {
 				fmt.Println("Error generating verification key:", err2)
 			}
@@ -41,8 +41,9 @@ func CreateVkPk() {
 			return
 		}
 	}
+
 	if _, err := os.Stat(verificationKeyFile); os.IsNotExist(err) {
-		_, verificationKey, error := GenerateVerificationKey()
+		_, verificationKey, error := GenerateKeyPair()
 		if error != nil {
 			fmt.Println("Error generating verification key:", error)
 		}
@@ -55,7 +56,7 @@ func CreateVkPk() {
 		components.Logger.Info("Verification key already exists. No action needed.")
 	}
 	if _, err := os.Stat(provingKeyFile); os.IsNotExist(err) {
-		provingKey, _, err2 := GenerateVerificationKey()
+		provingKey, _, err2 := GenerateKeyPair()
 		if err2 != nil {
 			fmt.Println("Error generating verification key:", err2)
 		}

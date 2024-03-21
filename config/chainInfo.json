@@ -1,0 +1,15 @@
+{
+ "chainInfo": {
+  "chainID": "bronchitis's",
+  "key": "spams",
+  "moniker": "Apalachicola's"
+ },
+ "daInfo": {
+  "daSelected": "celestia",
+  "daWalletAddress": "celestia1kd94m7dsh87fd452sdlpqz0as64mp6f07ln27l",
+  "daWalletKeypair": "0068ECE1E6FB5359"
+ },
+ "sequencerInfo": {
+  "sequencerType": "AIRC"
+ }
+}

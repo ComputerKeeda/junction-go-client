@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/ComputerKeeda/junction-go-client/components"
 	"github.com/ComputerKeeda/junction-go-client/types"
+	"github.com/google/uuid"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
-	"github.com/joho/godotenv"
 	"github.com/tjarratt/babble"
 	"os"
 )
@@ -40,15 +40,6 @@ func writeChainInfoToJson(info types.ChainInfoStruct) error {
 }
 
 func generateRandomChainInfo() (chainInfo types.ChainInfoStruct, err error) {
-	err = godotenv.Load()
-	if err != nil {
-		fmt.Println("Error loading .env file")
-		return chainInfo, err
-	}
-
-	daWalletAddress := os.Getenv("DaWalletAddress")
-	DaWalletKeypair := os.Getenv("DaWalletKeypair")
-
 	// Initialize the ChainInfoStruct variable
 	var chainInfoVar types.ChainInfoStruct
 
@@ -58,20 +49,37 @@ func generateRandomChainInfo() (chainInfo types.ChainInfoStruct, err error) {
 	chainInfoVar.ChainInfo.Moniker = generateRandomWord()
 
 	chainInfoVar.DaInfo.DaSelected = "celestia"
-	chainInfoVar.DaInfo.DaWalletAddress = daWalletAddress
-	chainInfoVar.DaInfo.DaWalletKeypair = DaWalletKeypair
+	chainInfoVar.DaInfo.DaWalletAddress = "celestia1kd94m7dsh87fd452sdlpqz0as64mp6f07ln27l"
+	chainInfoVar.DaInfo.DaWalletKeypair = "0068ECE1E6FB5359"
 
 	chainInfoVar.SequencerInfo.SequencerType = "AIRC"
 
 	return chainInfoVar, nil
 }
 
-func InitStation(addr string, client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account) {
+func InitStation() string {
+	accountName := "temp-account"
+	accountPath := "./temp-account"
+	addressPrefix := "air"
+	registry, err := cosmosaccount.New(cosmosaccount.WithHome(accountPath))
+	if err != nil {
+		components.Logger.Error(fmt.Sprintf("Error creating account registry: %v", err))
+	}
+
+	newTempAccount, err := registry.GetByName(accountName)
+	if err != nil {
+		components.Logger.Error(fmt.Sprintf("Error getting account: %v", err))
+	}
+
+	newTempAddr, err := newTempAccount.Address(addressPrefix)
+	if err != nil {
+		components.Logger.Error(fmt.Sprintf("Error getting address: %v", err))
+	}
 
 	chainInfo, err := generateRandomChainInfo()
 	if err != nil {
 		components.Logger.Error("error in generating chain info")
-		return
+		return ""
 	}
 
 	// Create config directory
@@ -79,7 +87,7 @@ func InitStation(addr string, client cosmosclient.Client, ctx context.Context, a
 	if err != nil {
 		errString := fmt.Sprintf("Error creating config directory: %v", err)
 		components.Logger.Error(errString)
-		return
+		return ""
 	}
 
 	// Write chainInfo to JSON
@@ -87,57 +95,83 @@ func InitStation(addr string, client cosmosclient.Client, ctx context.Context, a
 	if err != nil {
 		errString := fmt.Sprintf("error in writing chain info to JSON: %s", err)
 		components.Logger.Error(errString)
-		return
+		return ""
 	}
 
 	components.Logger.Info("chainInfo.json has been successfully created.")
 
-	//randomStationId, randomStationInfo := generateRandomString()
-	//// Define a message to create a post
-	//msg := &types.MsgInitStation{
-	//	Creator:         addr,
-	//	Tracks:          []string{"air10vnvsez37eukd9hm9yp3969n6m8y93444upax8", "air10vnvsez37eukd9hm9yp3969n6m8y93444upax8", "air10vnvsez37eukd9hm9yp3969n6m8y93444upax8", "air10vnvsez37eukd9hm9yp3969n6m8y93444upax8"},
-	//	VerificationKey: []byte("verificationKey"),
-	//	StationId:       randomStationId,
-	//	StationInfo:     randomStationInfo,
-	//}
-	//
-	//// Broadcast a transaction from account `alice` with the message
-	//// to create a post store response in txResp
-	//txResp, err := client.BroadcastTx(ctx, account, msg)
-	//if err != nil {
-	//	fmt.Println("txResp above")
-	//	fmt.Println(txResp)
-	//	fmt.Println("txResp below")
-	//	log.Fatal(err.Error())
-	//}
-	//
-	//// Print response from broadcasting a transaction
-	//fmt.Print("MsgCreatePost:\n\n")
-	//fmt.Println(txResp)
-	//
-	//// Instantiate a query client for your `blog` blockchain
-	//queryClient := types.NewQueryClient(client.Context())
-	//
-	//queryResp, err := queryClient.GetTracks(ctx, &types.QueryGetTracksRequest{StationId: randomStationId})
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Print("\n\nAll posts:\n\n")
-	//fmt.Println(queryResp)
-}
+	verificationKeyContents, err := os.ReadFile("verificationKey.json")
+	if err != nil {
+		components.Logger.Error("Error reading verificationKey.json file")
+		return ""
+	}
 
-// Function to generate a random string in the format "stationId-xxxx"
-//func generateRandomString() (string, string) {
-//	// Seed the random number generator
-//	rand.New(rand.NewSource(time.Now().UnixNano()))
-//
-//	// Generate a random four-digit number
-//	randomNumber := rand.Intn(9000) + 1000 // Generates a number between 1000 and 9999
-//
-//	// Concatenate the string parts
-//	randomStationId := fmt.Sprintf("stationId-%d", randomNumber)
-//	randomStationInfo := fmt.Sprintf("stationInfo-%d", randomNumber)
-//
-//	return randomStationId, randomStationInfo
-//}
+	//occupancy := components.GenerateRandomWithFavour(1, 10, [2]int{2, 5}, 0.5)
+	occupancy := 4
+	otherTrackMembers := components.GenerateAddresses(occupancy)
+
+	// tracks voting power creator
+	var tracksVotingPower []uint64
+	power := uint64(100 / 5)
+	for i := 0; i < 5; i++ {
+		tracksVotingPower = append(tracksVotingPower, power)
+	}
+
+	var tracks []string
+	tracks = append(tracks, newTempAddr)
+	tracks = append(tracks, otherTrackMembers...)
+	stationId := uuid.New()
+	randomStationInfo, randomStationInfoError := generateRandomChainInfo()
+	if randomStationInfoError != nil {
+		components.Logger.Error("Error generating random station info")
+		return ""
+	}
+	chainInfoAsString, err := json.Marshal(randomStationInfo.ChainInfo)
+	if err != nil {
+		components.Logger.Error("Error marshalling chain info")
+		return ""
+	}
+
+	ctx := context.Background()
+	gas := components.GenerateRandomWithFavour(600, 1200, [2]int{611, 1000}, 0.7)
+	gasFees := fmt.Sprintf("%damf", gas)
+	accountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix("air"), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome("./temp-account"), cosmosclient.WithGas("auto"), cosmosclient.WithFees(gasFees))
+	if err != nil {
+		components.Logger.Error("Error creating account client")
+		return ""
+	}
+
+	extraArg := types.StationArg{
+		TrackType: "Airchains sequencer",
+		DaType:    "Celestia",
+		Prover:    "Airchains",
+	}
+
+	extraArgBytes, err := json.Marshal(extraArg)
+	if err != nil {
+		components.Logger.Error("Error marshalling extra arg")
+		return ""
+	}
+
+	newStationData := types.MsgInitStation{
+		Creator:           newTempAddr,
+		Tracks:            tracks,
+		VerificationKey:   verificationKeyContents,
+		StationId:         stationId.String(),
+		StationInfo:       string(chainInfoAsString),
+		TracksVotingPower: tracksVotingPower,
+		ExtraArg:          extraArgBytes,
+	}
+
+	txResp, err := accountClient.BroadcastTx(ctx, newTempAccount, &newStationData)
+	if err != nil {
+		components.Logger.Error("Error in broadcasting transaction")
+		components.Logger.Error(err.Error())
+		return ""
+	}
+
+	components.Logger.Info("Station created successfully")
+	components.Logger.Info(fmt.Sprintf("Transaction hash: %s", txResp.TxHash))
+
+	return stationId.String()
+}

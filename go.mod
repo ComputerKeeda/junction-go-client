@@ -13,9 +13,9 @@ require (
 	github.com/cosmos/cosmos-sdk v0.50.3
 	github.com/cosmos/gogoproto v1.4.11
 	github.com/golang/protobuf v1.5.3
+	github.com/google/uuid v1.4.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/ignite/cli/v28 v28.2.0
-	github.com/joho/godotenv v1.5.1
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 	google.golang.org/genproto/googleapis/api v0.0.0-20231120223509-83a465c0220f
 	google.golang.org/grpc v1.60.1

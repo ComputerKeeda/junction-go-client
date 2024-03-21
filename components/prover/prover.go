@@ -115,7 +115,7 @@ func ComputeCCS() constraint.ConstraintSystem {
 	return ccs
 }
 
-func GenerateVerificationKey() (groth16.ProvingKey, groth16.VerifyingKey, error) {
+func GenerateKeyPair() (groth16.ProvingKey, groth16.VerifyingKey, error) {
 	ccs := ComputeCCS()
 	pk, vk, error := groth16.Setup(ccs)
 	return pk, vk, error

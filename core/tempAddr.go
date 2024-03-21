@@ -26,12 +26,12 @@ func GetTempAddr(amount int64) (newTempAddr string, newTempAccount cosmosaccount
 	addressPrefix := "air"
 
 	// Create a Cosmos newAccountClient instance
-	newAccountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome(accountPath), cosmosclient.WithGas("auto"), cosmosclient.WithFees("200amf"))
+	newAccountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome(accountPath), cosmosclient.WithGas("auto"), cosmosclient.WithFees("25amf"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	adminAccountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome("./accounts"), cosmosclient.WithGas("auto"), cosmosclient.WithFees("200amf"))
+	adminAccountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix(addressPrefix), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome("./accounts"), cosmosclient.WithGas("auto"), cosmosclient.WithFees("25amf"))
 	if err != nil {
 		log.Fatal(err)
 	}
