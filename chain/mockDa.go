@@ -24,15 +24,15 @@ type DAUploadStruct struct {
 	} `json:"metaData"`
 }
 
-func MockDa(transactions []string, currentStateHash string, batchNumber int) (string, error) {
+func MockDa(transactions []string, currentStateHash string, batchNumber int) (bool, error) {
 	daDecode, daDecodeErr := GetOldDaBlob()
 	if daDecodeErr != nil {
-		return "", daDecodeErr
+		return false, daDecodeErr
 	}
 	stationId, err := GetStationId()
 	if err != nil {
 		components.Logger.Error(err.Error())
-		return "", err
+		return false, err
 	}
 	DaStruct := DAUploadStruct{
 		TxnHashes:         transactions,
@@ -63,7 +63,7 @@ func MockDa(transactions []string, currentStateHash string, batchNumber int) (st
 		time.Sleep(3 * time.Second)
 		_, _ = MockDa(transactions, currentStateHash, batchNumber)
 	}
-	return "", nil
+	return true, nil
 }
 
 // MockDaSubmit  is a function that mocks the functionality of storing data in a mock database (leveldb). It takes the following parameters:
