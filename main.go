@@ -68,7 +68,11 @@ func main() {
 	}
 
 	//RecursiveFunctions(stationId, client, ctx )
-	core.InitVRF()
+	if !core.InitVRF() {
+		return
+	}
+
+	//vrf :=
 	core.GetVRF()
 
 	//RecursiveFunctions()

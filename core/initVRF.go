@@ -87,6 +87,7 @@ func InitVRF() bool {
 		components.Logger.Error(err.Error())
 		return false
 	}
+
 	proof, vrfOutput, err := vrf.GenerateVRFProof(suite, privateKey, serializedRC, int64(rc.BlockNum))
 	if err != nil {
 		fmt.Printf("Error generating unique proof: %v\n", err)
@@ -98,6 +99,7 @@ func InitVRF() bool {
 		Proof:        proof,
 		VrfOutput:    vrfOutput,
 	}
+
 	// marshal
 	extraArgsByte, err := json.Marshal(extraArg)
 	if err != nil {

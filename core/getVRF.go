@@ -32,5 +32,5 @@ func GetVRF() {
 		return
 	}
 
-	components.Logger.Info(fmt.Sprintf("VRF: %s", queryResp.Details))
+	components.Logger.Info(fmt.Sprintf("VRF: %s", queryResp.Details)) // types.VrfRecord
 }
