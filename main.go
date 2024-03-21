@@ -97,43 +97,100 @@ func RecursiveFunctions() { // client, ctx context.Context
 	}
 
 	// validate vrf
-	validateVRFResponse := core.ValidateVRF(serializedRc)
-	if !validateVRFResponse {
-		return
+	for {
+		validateVRFResponse := core.ValidateVRF(funcLevelSerializedRc)
+		if !validateVRFResponse {
+			time.Sleep(5 * time.Second)
+		} else {
+			break
+		}
 	}
 
 	// check if verification success
-	vrfRecord := core.GetVRF()
-	if vrfRecord == nil {
-		return
-	}
-	if !vrfRecord.IsVerified {
-		components.Logger.Error("Verification failed")
-		return
+	var vrfRecord *types.VrfRecord
+	for {
+		vrfRecord = core.GetVRF()
+		if vrfRecord == nil {
+			components.Logger.Error("VRF record is nil")
+			time.Sleep(5 * time.Second)
+		} else {
+			break
+		}
+		if !vrfRecord.IsVerified {
+			components.Logger.Error("Verification failed")
+			time.Sleep(5 * time.Second)
+		} else {
+			break
+		}
 	}
 
-	podNumber, err := chain.GetPodNumber()
-	if err != nil {
-		components.Logger.Error(err.Error())
-		return
+	var funcLevelPodNumber uint64
+	for {
+		podNumber, err := chain.GetPodNumber()
+		if err != nil {
+			components.Logger.Error(err.Error())
+			time.Sleep(5 * time.Second)
+		} else {
+			funcLevelPodNumber = podNumber
+			break
+		}
 	}
-	intPodNumber := int(podNumber)
 
-	ps := components.GenerateUniqueRandomValues(25) // Generate 25 sets of unique values
-	witnessVector, currentStatusHash, proofByte, pkErr := prover.GenerateProof(ps, intPodNumber)
-	if pkErr != nil {
-		components.Logger.Error(fmt.Sprintf("Error in generating proof : %s", pkErr.Error()))
-		return
+	intPodNumber := int(funcLevelPodNumber)
+
+	var funcLevelWitnessVector any
+	var funcLevelCurrentStatusHash string
+	var funcLevelProofByte []byte
+	var funcLevelPsTxHash []string
+	for {
+		ps := components.GenerateUniqueRandomValues(25) // Generate 25 sets of unique values
+		funcLevelPsTxHash = ps.TransactionHash
+		witnessVector, currentStatusHash, proofByte, pkErr := prover.GenerateProof(ps, intPodNumber)
+		if pkErr != nil {
+			components.Logger.Error(fmt.Sprintf("Error in generating proof : %s", pkErr.Error()))
+			time.Sleep(5 * time.Second)
+		} else {
+			funcLevelWitnessVector = witnessVector
+			funcLevelCurrentStatusHash = currentStatusHash
+			funcLevelProofByte = proofByte
+			break
+		}
 	}
 
 	// Mock DA call
-	success, daKeyHash := chain.MockDa(ps.TransactionHash, currentStatusHash, intPodNumber)
-
-	// submit pod
-	podSubmitSuccess := core.SubmitPod(currentStatusHash, witnessVector)
-	if !podSubmitSuccess {
-		components.Logger.Error("Pod submission failed")
-		return
+	for {
+		success, _ := chain.MockDa(funcLevelPsTxHash, funcLevelCurrentStatusHash, intPodNumber)
+		if success {
+			var podSubmitSuccess bool
+			// submit pod
+			for {
+				podSubmitSuccess = core.SubmitPod(funcLevelCurrentStatusHash, funcLevelWitnessVector)
+				if !podSubmitSuccess {
+					components.Logger.Error("Pod submission failed")
+					time.Sleep(3 * time.Second)
+					continue
+				} else {
+					break
+				}
+			}
+			// verify pod
+			for {
+				verifyPodSuccess := core.VerifyPod(funcLevelProofByte)
+				if !verifyPodSuccess {
+					components.Logger.Error("Pod Verification failed")
+					time.Sleep(5 * time.Second)
+					continue
+				} else {
+					break
+				}
+			}
+			break
+		} else {
+			//	else we have to show the error here
+			components.Logger.Error("DA failed retrying... in 3 seconds")
+			time.Sleep(3 * time.Second)
+			continue
+		}
 	}
 
 	for {
