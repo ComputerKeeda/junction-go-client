@@ -133,7 +133,7 @@ func InitStation() string {
 	}
 
 	ctx := context.Background()
-	gas := components.GenerateRandomWithFavour(600, 1200, [2]int{611, 1000}, 0.7)
+	gas := components.GenerateRandomWithFavour(611, 1200, [2]int{612, 1000}, 0.7)
 	gasFees := fmt.Sprintf("%damf", gas)
 	accountClient, err := cosmosclient.New(ctx, cosmosclient.WithAddressPrefix("air"), cosmosclient.WithNodeAddress(components.JunctionTTCRPC), cosmosclient.WithHome("./temp-account"), cosmosclient.WithGas("auto"), cosmosclient.WithFees(gasFees))
 	if err != nil {

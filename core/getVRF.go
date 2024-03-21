@@ -8,17 +8,17 @@ import (
 	"github.com/ComputerKeeda/junction-go-client/types"
 )
 
-func GetVRF() {
+func GetVRF() *types.VrfRecord {
 
 	stationId, err := chain.GetStationId()
 	if err != nil {
 		components.Logger.Error(err.Error())
-		return
+		return nil
 	}
 	podNumber, err := chain.GetPodNumber()
 	if err != nil {
 		components.Logger.Error(err.Error())
-		return
+		return nil
 	}
 
 	qClient := components.GetQueryClient()
@@ -29,8 +29,10 @@ func GetVRF() {
 	})
 	if err != nil {
 		fmt.Println("Error fetching VRF: ", err)
-		return
+		return nil
 	}
 
 	components.Logger.Info(fmt.Sprintf("VRF: %s", queryResp.Details)) // types.VrfRecord
+
+	return queryResp.Details
 }

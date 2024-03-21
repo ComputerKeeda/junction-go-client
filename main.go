@@ -67,26 +67,39 @@ func main() {
 		components.Logger.Error("Error saving VRF public key")
 	}
 
-	//RecursiveFunctions(stationId, client, ctx )
-	if !core.InitVRF() {
-		return
-	}
-
-	//vrf :=
-	core.GetVRF()
-
-	//RecursiveFunctions()
+	RecursiveFunctions()
 }
 
 func RecursiveFunctions() { // client, ctx context.Context
 
+	initVRFResponse, serializedRc := core.InitVRF()
+	if !initVRFResponse {
+		return
+	}
+
+	// validate vrf
+	validateVRFResponse := core.ValidateVRF(serializedRc)
+	if !validateVRFResponse {
+		return
+	}
+
+	// check if verification success
+	vrfRecord := core.GetVRF()
+	if vrfRecord == nil {
+		return
+	}
+	if !vrfRecord.IsVerified {
+		components.Logger.Error("Verification failed")
+		return
+	}
+
 	/*
+		✔️Vrf init
+		✔️Vrf verify
 		Pod submit
 		Pod verify
-
-		Vrf init
-		Vrf verify
+		update podNumber in podNumber.txt
 	*/
 
-	RecursiveFunctions()
+	//RecursiveFunctions()
 }
