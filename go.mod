@@ -17,6 +17,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/ignite/cli/v28 v28.2.0
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
+	go.dedis.ch/kyber/v3 v3.1.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20231120223509-83a465c0220f
 	google.golang.org/grpc v1.60.1
 )
@@ -151,6 +152,7 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/zondax/hid v0.9.2 // indirect
 	github.com/zondax/ledger-go v0.14.3 // indirect
+	go.dedis.ch/fixbuf v1.0.3 // indirect
 	go.etcd.io/bbolt v1.3.8 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect

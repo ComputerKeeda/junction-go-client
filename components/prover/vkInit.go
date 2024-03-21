@@ -2,7 +2,6 @@ package prover
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/ComputerKeeda/junction-go-client/components"
 	"os"
 )

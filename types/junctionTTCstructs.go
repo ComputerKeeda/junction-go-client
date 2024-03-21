@@ -103,3 +103,9 @@ type SLProofStruct struct {
 		Y int `json:"Y"`
 	} `json:"CommitmentPok"`
 }
+
+type ExtraArg struct {
+	SerializedRc []byte `json:"serializedRc"`
+	Proof        []byte `json:"proof"`
+	VrfOutput    []byte `json:"vrfOutput"`
+}

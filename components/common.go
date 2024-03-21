@@ -1,7 +1,10 @@
 package components
 
 import (
+	"context"
 	"fmt"
+	"github.com/ComputerKeeda/junction-go-client/types"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"math/rand"
 	"time"
 )
@@ -82,4 +85,17 @@ func GenerateRandomWithFavour(lowerBound, upperBound int, favourableSet [2]int, 
 	}
 
 	return randNum
+}
+
+func GetQueryClient() types.QueryClient {
+	ctx := context.Background()
+	// getting the account and creating client codes --> End
+	client, err := cosmosclient.New(ctx, cosmosclient.WithNodeAddress(JunctionTTCRPC))
+	if err != nil {
+		Logger.Error("Error creating account client")
+	}
+
+	queryClient := types.NewQueryClient(client.Context())
+
+	return queryClient
 }
