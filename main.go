@@ -71,14 +71,15 @@ func main() {
 	//RecursiveFunctions()
 }
 
-func RecursiveFunctions(stationId string) {
+func RecursiveFunctions() { // client, ctx context.Context
 
 	/*
-		Vrf init
-		Vrf verify
 		Pod submit
 		Pod verify
+
+		Vrf init
+		Vrf verify
 	*/
 
-	RecursiveFunctions(stationId)
+	RecursiveFunctions()
 }

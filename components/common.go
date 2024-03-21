@@ -11,6 +11,7 @@ import (
 
 const (
 	JunctionTTCRPC      = "http://34.131.189.98:26657"
+	JunctionAPI         = "http://34.131.189.98:1317"
 	BatchSize           = 25
 	SettlementClientRPC = "http://127.0.0.1:8080"
 	DaClientRPC         = "http://127.0.0.1:5050/celestia"

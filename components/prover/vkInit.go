@@ -6,75 +6,44 @@ import (
 	"os"
 )
 
+// CreateVkPk generates and saves a Proving Key and a Verification Key.
+// If either file doesn't exist, it will generate and save new keys. Otherwise, it will print a message stating that both keys already exist.
 func CreateVkPk() {
-	verificationKeyFile := "verificationKey.json"
 	provingKeyFile := "provingKey.txt"
+	verificationKeyFile := "verificationKey.json"
 
-	if _, err := os.Stat(provingKeyFile); os.IsNotExist(err) {
-		if _, err := os.Stat(verificationKeyFile); os.IsNotExist(err) {
-			provingKey, verificationKey, err2 := GenerateKeyPair()
-			if err2 != nil {
-				fmt.Println("Error generating verification key:", err2)
-			}
-			vkJSON, _ := json.Marshal(verificationKey)
-			vkErr := os.WriteFile(verificationKeyFile, vkJSON, 0644)
-			if vkErr != nil {
-				fmt.Println("Error writing verification key to file:", vkErr)
-			}
-			file, err := os.Create(provingKeyFile)
-			if err != nil {
-				fmt.Println("Error creating file:", err)
-				return
-			}
-			defer func(file *os.File) {
-				err := file.Close()
-				if err != nil {
-					fmt.Println("Error closing file:", err)
-				}
-			}(file)
-			_, err = provingKey.WriteTo(file)
-			if err != nil {
-				fmt.Println("Error writing proving key to buffer:", err)
-			}
-		} else {
+	_, err1 := os.Stat(provingKeyFile)
+	_, err2 := os.Stat(verificationKeyFile)
+
+	// If either file doesn't exist, generate and save new keys
+	if os.IsNotExist(err1) || os.IsNotExist(err2) {
+		provingKey, verificationKey, err := GenerateKeyPair()
+		if err != nil {
+			components.Logger.Error("Unable to generate key pair" + err.Error())
 			return
 		}
-	}
 
-	if _, err := os.Stat(verificationKeyFile); os.IsNotExist(err) {
-		_, verificationKey, error := GenerateKeyPair()
-		if error != nil {
-			fmt.Println("Error generating verification key:", error)
-		}
-		vkJSON, _ := json.Marshal(verificationKey)
-		vkErr := os.WriteFile(verificationKeyFile, vkJSON, 0644)
-		if vkErr != nil {
-			fmt.Println("Error writing verification key to file:", vkErr)
-		}
-	} else {
-		components.Logger.Info("Verification key already exists. No action needed.")
-	}
-	if _, err := os.Stat(provingKeyFile); os.IsNotExist(err) {
-		provingKey, _, err2 := GenerateKeyPair()
-		if err2 != nil {
-			fmt.Println("Error generating verification key:", err2)
-		}
-		file, err := os.Create(provingKeyFile)
+		// Save Proving Key
+		pkFile, err := os.Create(provingKeyFile)
 		if err != nil {
-			fmt.Println("Error creating file:", err)
+			components.Logger.Error("Unable to create Proving Key file" + err.Error())
 			return
 		}
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				fmt.Println("Error closing file:", err)
-			}
-		}(file)
-		_, err = provingKey.WriteTo(file)
+		_, err = provingKey.WriteTo(pkFile)
+		pkFile.Close()
 		if err != nil {
-			fmt.Println("Error writing proving key to buffer:", err)
+			components.Logger.Error("Unable to write Proving Key" + err.Error())
+			return
 		}
+
+		// Save Verification Key
+		file, _ := json.MarshalIndent(verificationKey, "", " ")
+		err = os.WriteFile(verificationKeyFile, file, 0644)
+		if err != nil {
+			components.Logger.Error("Unable to write Verification Key to file" + err.Error())
+		}
+		components.Logger.Info("Proving key and Verification key generated and saved successfully\n")
 	} else {
-		components.Logger.Info("Proving key already exists. No action needed.")
+		components.Logger.Info("Both Proving key and Verification key already exist. No action needed.")
 	}
 }
